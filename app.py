@@ -33,10 +33,9 @@ class PayLoad(BaseModel):
 
 
 @app.get("/")
-async def get_url(topic: str) -> JSONResponse:
-    """Get the wikipedia url of topic."""
-    url = wikipedia.page(topic).url
-    return JSONResponse({"topic": topic, "url": url})
+async def home() -> JSONResponse:
+    """Home page."""
+    return JSONResponse({"api_key": os.getenv("OPENAI_API_KEY")})
 
 
 class Statements(BaseModel):
