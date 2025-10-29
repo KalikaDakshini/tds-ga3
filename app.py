@@ -35,7 +35,7 @@ class PayLoad(BaseModel):
 @app.get("/")
 async def home() -> JSONResponse:
     """Home page."""
-    return JSONResponse({"api_key": os.getenv("OPENAI_API_KEY")})
+    return JSONResponse({"msg": "Kalika's GA3"})
 
 
 class Statements(BaseModel):
@@ -84,8 +84,6 @@ async def analyze(payload: Statements) -> JSONResponse:
             for sentence in payload.sentences
         ]
     )
-
-    print(sentiments)
 
     results = [
         {"sentence": sentence, "sentiment": sentiment}
