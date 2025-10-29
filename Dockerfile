@@ -1,13 +1,26 @@
+# Set base image
 FROM python:3.11-slim
 
-RUN useradd -m -u 1000 user
-USER user
-ENV PATH="/home/user/.local/bin:$PATH"
-
+# Set working directory
 WORKDIR /app
 
-COPY --chown=user ./requirements.txt requirements.txt
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip &&\
+	pip install --no-cache-dir -r requirements.txt
 
-COPY --chown=user . /app
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
+# Add user
+RUN useradd -m kalika
+
+# Copy application code
+COPY --chown=kalika:kalika . .
+
+# Switch to non-root user
+USER kalika
+
+# Expose port
+ENV APP_PORT=8000
+EXPOSE ${APP_PORT}
+
+# Run the application
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
