@@ -1,3 +1,5 @@
 uvicorn
 fastapi
 wikipedia
+openai
+python-dotenv
