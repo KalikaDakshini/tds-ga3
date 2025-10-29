@@ -78,12 +78,17 @@ async def get_sentiment(sentence: str) -> str:
 async def analyze(payload: Statements) -> JSONResponse:
     """Analyze the sentiment of statements."""
     # Get sentiments
-    sentiments = [
-        asyncio.create_task(get_sentiment(sentence)) for sentence in payload.sentences
-    ]
+    sentiments = await asyncio.gather(
+        *[
+            asyncio.create_task(get_sentiment(sentence))
+            for sentence in payload.sentences
+        ]
+    )
+
+    print(sentiments)
 
     results = [
-        {"sentence": sentence, "sentiment": sentiment.result()}
+        {"sentence": sentence, "sentiment": sentiment}
         for (sentence, sentiment) in zip(payload.sentences, sentiments, strict=True)
     ]
 
