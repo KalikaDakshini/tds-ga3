@@ -1,12 +1,18 @@
 """Question 2 of TDS GA3."""
 
+import asyncio
+import os
 import re
 
+import openai
 import wikipedia
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -39,23 +45,47 @@ class Statements(BaseModel):
     sentences: list[str]
 
 
-def get_sentiment(sentence: str) -> str:
-    """Get the sentiment of a statement using an LLM."""
-    return "happy"
-
-
 @app.get("/sentiment")
 def get_page() -> str:
     """Placeholder function."""
     return "Sentiment Analysis"
 
 
+async def get_sentiment(sentence: str) -> str:
+    """Get the sentiment of a statement using an LLM."""
+    async with openai.AsyncClient(
+        api_key=os.getenv("OPENAI_API_KEY"), base_url="https://aipipe.org/openai/v1"
+    ) as client:
+        response = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a sentiment analysis assistant. "
+                        "Respond with only one word: 'happy', 'sad', or 'neutral'."
+                    ),
+                },
+                {"role": "user", "content": sentence},
+            ],
+            temperature=0.0,
+        )
+
+    sentiment = response.choices[0].message.content.strip().lower()
+    return sentiment
+
+
 @app.post("/sentiment")
-def analyze(payload: Statements) -> JSONResponse:
+async def analyze(payload: Statements) -> JSONResponse:
     """Analyze the sentiment of statements."""
+    # Get sentiments
+    sentiments = [
+        asyncio.create_task(get_sentiment(sentence)) for sentence in payload.sentences
+    ]
+
     results = [
-        {"sentence": sentence, "sentiment": get_sentiment(sentence)}
-        for sentence in payload.sentences
+        {"sentence": sentence, "sentiment": sentiment.result()}
+        for (sentence, sentiment) in zip(payload.sentences, sentiments, strict=True)
     ]
 
     return JSONResponse({"results": results})
