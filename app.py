@@ -33,6 +33,28 @@ async def get_url(topic: str) -> JSONResponse:
     return JSONResponse({"topic": topic, "url": url})
 
 
+class Statements(BaseModel):
+    """Model for Statements."""
+
+    sentences: list[str]
+
+
+def get_sentiment(sentence: str) -> str:
+    """Get the sentiment of a statement using an LLM."""
+    return "happy"
+
+
+@app.post("/sentiment")
+def analyze(payload: Statements) -> JSONResponse:
+    """Analyze the sentiment of statements."""
+    results = [
+        {"sentence": sentence, "sentiment": get_sentiment(sentence)}
+        for sentence in payload.sentences
+    ]
+
+    return JSONResponse({"results": results})
+
+
 @app.post("/file")
 async def mime_type(payload: PayLoad) -> JSONResponse:
     """Infer and return the mime type."""
