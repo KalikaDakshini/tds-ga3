@@ -33,9 +33,9 @@ class PayLoad(BaseModel):
 
 
 @app.get("/")
-async def home() -> JSONResponse:
+async def home(topic: str) -> JSONResponse:
     """Home page."""
-    return JSONResponse({"msg": "Kalika's GA3"})
+    return JSONResponse({"topic": topic, "url": wikipedia.page(topic).url})
 
 
 class Statements(BaseModel):
