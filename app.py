@@ -44,6 +44,12 @@ def get_sentiment(sentence: str) -> str:
     return "happy"
 
 
+@app.get("/sentiment")
+def get_page() -> str:
+    """Placeholder function."""
+    return "Sentiment Analysis"
+
+
 @app.post("/sentiment")
 def analyze(payload: Statements) -> JSONResponse:
     """Analyze the sentiment of statements."""
